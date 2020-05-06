@@ -33,4 +33,52 @@ window.addEventListener('DOMContentLoaded', function(){
             tabContent[b].classList.add('show');
         }
     }
+
+    // timer
+
+    let deadline = '2020-06-21';
+
+    function getTimeRemaining(endtime) {
+        let t = Date.parse(endtime) - Date.parse(new Date());
+        let seconds = Math.floor((t/1000) % 60);
+        let minutes = Math.floor((t/1000/60) % 60);
+        let hours = Math.floor((t/1000/60/60) % 24);
+        let days = Math.floor((t/1000/60/60/24));
+
+        return {
+            'total' : t,
+            'days' : days,
+            'hours' : hours,
+            'minutes' : minutes,
+            'seconds' : seconds
+        };
+    }
+
+    function setClock(id, endtime) {
+        let timer = document.getElementById(id);
+        let days = timer.querySelector('.days');
+        let hours = timer.querySelector('.hours');
+        let minutes = timer.querySelector('.minutes');
+        let seconds = timer.querySelector('.seconds');
+        let timeInterval = setInterval(updateClock, 1000);
+
+        function updateClock() {
+            let t = getTimeRemaining(endtime);
+            hours.textContent = t.hours;
+            minutes.textContent = t.minutes;
+            seconds.textContent = (t.seconds < 10) ? '0' + t.seconds : t.seconds;
+            days.textContent = t.days;
+
+            if (t.total <= 0) {
+                clearInterval(timeInterval);
+
+                hours.textContent = '00';
+                minutes.textContent = '00';
+                seconds.textContent = '00';
+                days.textContent = '00';
+            }
+        }
+    }
+
+    setClock('timer', deadline);
 });

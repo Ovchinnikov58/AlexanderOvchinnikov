@@ -717,3 +717,7 @@ header ul li:before {
 .overlay .popup-form__btn:hover {
   box-shadow: 0 0 10px #c78030;
 }
+.s-span {
+  font-size: 22px;
+  vertical-align: middle;
+}
