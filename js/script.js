@@ -1,6 +1,39 @@
 'use strict';
 
 window.addEventListener('DOMContentLoaded', function(){
+    //плавная прокрутка
+    let linkNav = document.querySelectorAll('[href^="#"]'); //выбираем все ссылки к якорю на странице
+    let V = 0.6; // скорость, может иметь дробное значение через точку (чем меньше значение - тем больше скорость)
+    
+    for (let i = 0; i < linkNav.length; i++) {
+
+        linkNav[i].addEventListener('click', function(e) { //по клику на ссылку
+            e.preventDefault();
+             //отменяем стандартное поведение
+            let w = window.pageYOffset;  // производим прокрутка прокрутка
+            let hash = this.href.replace(/[^#]*(.*)/, '$1');  // к id элемента, к которому нужно перейти
+            let t = document.querySelector(hash).getBoundingClientRect().top;  // отступ от окна браузера до id
+            let start = null;
+
+            requestAnimationFrame(step);  // подробнее про функцию анимации [developer.mozilla.org]
+            function step(time) {
+                if (start === null) start = time;
+
+                let progress = time - start;
+                let r = (t < 0 ? Math.max(w - progress/V, w + t) : Math.min(w + progress/V, w + t));
+
+                window.scrollTo( 0, r );
+                if (r != w + t) {
+                    requestAnimationFrame(step)
+                } else {
+                    location.hash = hash  // URL с хэшем
+                }
+            }
+        }, false);
+    }
+
+    //табы
+    
     let tab = document.querySelectorAll('.info-header-tab');
     let info = document.querySelector('.info-header');
     let tabContent = document.querySelectorAll('.info-tabcontent');
@@ -64,10 +97,10 @@ window.addEventListener('DOMContentLoaded', function(){
 
         function updateClock() {
             let t = getTimeRemaining(endtime);
-            hours.textContent = t.hours;
-            minutes.textContent = t.minutes;
+            hours.textContent = (t.hours < 10) ? '0' + t.hours : t.hours;
+            minutes.textContent = (t.minutes < 10) ? '0' + t.minutes : t.minutes;
             seconds.textContent = (t.seconds < 10) ? '0' + t.seconds : t.seconds;
-            days.textContent = t.days;
+            days.textContent = (t.days < 10) ? '0' + t.days : t.days;
 
             if (t.total <= 0) {
                 clearInterval(timeInterval);
@@ -81,4 +114,80 @@ window.addEventListener('DOMContentLoaded', function(){
     }
 
     setClock('timer', deadline);
+
+    // modal
+
+    let more = document.querySelector('.more');
+    let overlay = document.querySelector('.overlay');
+    let close = document.querySelector('.popup-close');
+    let infoBlock = document.querySelector('.info');
+
+    infoBlock.addEventListener('click', function(event) {
+        if (!event.target.classList.contains('description-btn')) return;
+        openModal();
+    });
+
+    more.addEventListener('click', openModal);
+    close.addEventListener('click', closeModal);
+
+    function openModal() {
+        overlay.style.display = 'block';
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+        overlay.style.display = 'none';
+        document.body.style.overflow = '';
+    }
+
+    //Form
+
+    let message = {
+        loading: 'Загружка...',
+        success: 'Спасибо! Скоро мы с вами свяжемся!',
+        failure: 'Что-то пошло не так'
+    };
+
+    let form = document.querySelector('.main-form');
+    let input = form.getElementsByTagName('input');
+    let statusMessage = document.createElement('div');
+
+    statusMessage.classList.add('status');
+    form.addEventListener('submit', function(event) {
+        event.preventDefault();
+        form.appendChild(statusMessage);
+
+        let request = new XMLHttpRequest();
+        request.open('POST', 'server.php');
+        //request.setRequestHeader('Content-Type', 'aplication/x-www-form-urlencoded'); // сервер
+        request.setRequestHeader('Content-Type', 'aplication/json; charset=utf-8'); // json
+
+        let formData = new FormData(form);
+
+        let obj = {};
+
+        formData.forEach((value, key) => {
+            obj[key] = value;
+        });
+
+        let json = JSON.stringify(obj);
+
+        //request.send(formData);
+        request.send(json);
+
+        request.addEventListener('readystatechange', function() {
+            if (request.readyState < 4) {
+                statusMessage.innerHTML = message.loading;
+            } else if (request.readyState === 4 && request.status == 200) {
+                statusMessage.innerHTML = message.success;
+            } else {
+                statusMessage.innerHTML = message.failure;
+            }
+        });
+
+        for (let i = 0; i < input.length; i++) {
+            input[i].value = '';
+        }
+    });
 });
+
