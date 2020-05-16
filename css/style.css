@@ -4,10 +4,10 @@
 .fade {
   -webkit-animation-name: fade;
           animation-name: fade;
-  -webkit-animation-duration: 2.5s;
-          animation-duration: 2.5s;
+  -webkit-animation-duration: 0.7s;
+          animation-duration: 0.7s;
   -webkit-animation-name: fade;
-  -webkit-animation-duration: 2.5s;
+  -webkit-animation-duration: 0.7s;
 }
 @-webkit-keyframes fade {
   from {
@@ -723,4 +723,8 @@ header ul li:before {
 .s-span {
   font-size: 22px;
   vertical-align: middle;
+}
+.status {
+  text-align: center;
+  padding: 10px 0;
 }
